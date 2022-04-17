@@ -1,0 +1,29 @@
+# Cython Examples
+
+This example set allows us to look at the binding of Python to C/C++ using Cython. This example follows the
+tutoral posted at https://towardsdatascience.com/use-cython-to-get-more-than-30x-speedup-on-your-python-code-f6cb337919b6
+
+
+## Install Cython
+
+Install Cython according to your OS instructions. For Mac OS X, use brew to install and pip3.  The 
+following instructions use a Python 3 installation.
+
+    % module load python/3.8.6
+    % brew install cython
+    % pip3 install cython
+
+## Examples
+
+
+### Add
+
+The first example code provides an implementation comparison to the previous pybind11 
+add example. The directory ./add/py contains the python only implementation and the cy, the cython.
+
+Create a shared object of the pyx functions:
+
+    % cd add/cy
+    % python3 setup.py build_ext --inplace
+    % python3 run.py
+
