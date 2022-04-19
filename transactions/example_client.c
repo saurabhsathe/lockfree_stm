@@ -864,6 +864,16 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_GetAttrStr(PyObject* obj, PyObject
 /* GetBuiltinName.proto */
 static PyObject *__Pyx_GetBuiltinName(PyObject *name);
 
+/* GetModuleGlobalName.proto */
+static CYTHON_INLINE PyObject *__Pyx_GetModuleGlobalName(PyObject *name);
+
+/* PyCFunctionFastCall.proto */
+#if CYTHON_FAST_PYCCALL
+static CYTHON_INLINE PyObject *__Pyx_PyCFunction_FastCall(PyObject *func, PyObject **args, Py_ssize_t nargs);
+#else
+#define __Pyx_PyCFunction_FastCall(func, args, nargs)  (assert(0), NULL)
+#endif
+
 /* PyFunctionFastCall.proto */
 #if CYTHON_FAST_PYCALL
 #define __Pyx_PyFunction_FastCall(func, args, nargs)\
@@ -886,6 +896,9 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg
 #if CYTHON_COMPILING_IN_CPYTHON
 static CYTHON_INLINE PyObject* __Pyx_PyObject_CallMethO(PyObject *func, PyObject *arg);
 #endif
+
+/* PyObjectCallOneArg.proto */
+static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObject *arg);
 
 /* PyObjectCallNoArg.proto */
 #if CYTHON_COMPILING_IN_CPYTHON
@@ -973,6 +986,9 @@ static void __Pyx_WriteUnraisable(const char *name, int clineno,
                                   int lineno, const char *filename,
                                   int full_traceback, int nogil);
 
+/* Import.proto */
+static PyObject *__Pyx_Import(PyObject *name, PyObject *from_list, int level);
+
 /* CLineInTraceback.proto */
 #ifdef CYTHON_CLINE_IN_TRACEBACK
 #define __Pyx_CLineForTraceback(tstate, c_line)  (((CYTHON_CLINE_IN_TRACEBACK)) ? c_line : 0)
@@ -1056,8 +1072,10 @@ static const char __pyx_k_file[] = "file";
 static const char __pyx_k_main[] = "__main__";
 static const char __pyx_k_quit[] = "quit";
 static const char __pyx_k_test[] = "__test__";
+static const char __pyx_k_time[] = "time";
 static const char __pyx_k_hello[] = "hello";
 static const char __pyx_k_print[] = "print";
+static const char __pyx_k_import[] = "__import__";
 static const char __pyx_k_client_shmat[] = "client shmat";
 static const char __pyx_k_client_shmget[] = "client shmget";
 static const char __pyx_k_Reached_here_1[] = "Reached here 1";
@@ -1067,6 +1085,7 @@ static const char __pyx_k_data_version_is[] = "data version is ";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_client_shutting_down[] = "client shutting down\n";
 static const char __pyx_k_size_of_app_data_segment[] = "size of app data segment: \n";
+static const char __pyx_k_here_is_the_execution_time[] = "here is the execution time";
 static const char __pyx_k_process_2_starting_new_transacti[] = "process 2 : starting new transaction";
 static const char __pyx_k_process_2_wwaiting_for_other_pro[] = "process 2 : wwaiting for other process to complete its transaction";
 static const char __pyx_k_transaction_complete_from_proces[] = "transaction complete from process 2 ";
@@ -1082,6 +1101,8 @@ static PyObject *__pyx_kp_s_data_version_is;
 static PyObject *__pyx_n_s_end;
 static PyObject *__pyx_n_s_file;
 static PyObject *__pyx_n_s_hello;
+static PyObject *__pyx_kp_s_here_is_the_execution_time;
+static PyObject *__pyx_n_s_import;
 static PyObject *__pyx_n_s_main;
 static PyObject *__pyx_n_s_print;
 static PyObject *__pyx_kp_s_process_2_starting_new_transacti;
@@ -1090,6 +1111,7 @@ static PyObject *__pyx_n_s_quit;
 static PyObject *__pyx_kp_s_size_of_app_data_segment;
 static PyObject *__pyx_n_s_sub;
 static PyObject *__pyx_n_s_test;
+static PyObject *__pyx_n_s_time;
 static PyObject *__pyx_kp_s_transaction_complete_from_proces;
 static PyObject *__pyx_pf_14example_client_client(CYTHON_UNUSED PyObject *__pyx_self); /* proto */
 static PyObject *__pyx_int_0;
@@ -1098,16 +1120,17 @@ static PyObject *__pyx_int_10;
 static PyObject *__pyx_int_15;
 /* Late includes */
 
-/* "example_client.pyx":41
+/* "example_client.pyx":42
  *     int APP_SHM_SIZE
  * 
  * cpdef void client():             # <<<<<<<<<<<<<<
+ *     t1=time.time()
  *     print("size of app data segment: \n", APP_SHM_SIZE);
- *     cdef int shmid = shmget(APP_SHM_KEY, 100,0666);
  */
 
 static PyObject *__pyx_pw_14example_client_1client(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
 static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatch) {
+  PyObject *__pyx_v_t1 = NULL;
   int __pyx_v_shmid;
   AppData *__pyx_v_shm;
   CYTHON_UNUSED int __pyx_v_latest_version;
@@ -1118,37 +1141,71 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
   int __pyx_v_current;
   int __pyx_v_bal;
   CYTHON_UNUSED long __pyx_v_prev;
+  PyObject *__pyx_v_t2 = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
   PyObject *__pyx_t_2 = NULL;
-  int __pyx_t_3;
+  PyObject *__pyx_t_3 = NULL;
   int __pyx_t_4;
-  PyObject *__pyx_t_5 = NULL;
+  int __pyx_t_5;
   long __pyx_t_6;
   __Pyx_RefNannySetupContext("client", 0);
 
-  /* "example_client.pyx":42
+  /* "example_client.pyx":43
  * 
  * cpdef void client():
+ *     t1=time.time()             # <<<<<<<<<<<<<<
+ *     print("size of app data segment: \n", APP_SHM_SIZE);
+ *     cdef int shmid = shmget(APP_SHM_KEY, 100,0666);
+ */
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_time); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 43, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_time); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 43, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = NULL;
+  if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_3))) {
+    __pyx_t_2 = PyMethod_GET_SELF(__pyx_t_3);
+    if (likely(__pyx_t_2)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
+      __Pyx_INCREF(__pyx_t_2);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_3, function);
+    }
+  }
+  if (__pyx_t_2) {
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 43, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  } else {
+    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 43, __pyx_L1_error)
+  }
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_v_t1 = __pyx_t_1;
+  __pyx_t_1 = 0;
+
+  /* "example_client.pyx":44
+ * cpdef void client():
+ *     t1=time.time()
  *     print("size of app data segment: \n", APP_SHM_SIZE);             # <<<<<<<<<<<<<<
  *     cdef int shmid = shmget(APP_SHM_KEY, 100,0666);
  *     print("hello")
  */
-  __pyx_t_1 = __Pyx_PyInt_From_int(APP_SHM_SIZE); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 42, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_int(APP_SHM_SIZE); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 44, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 42, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 44, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
   __Pyx_INCREF(__pyx_kp_s_size_of_app_data_segment);
   __Pyx_GIVEREF(__pyx_kp_s_size_of_app_data_segment);
-  PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_kp_s_size_of_app_data_segment);
+  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_kp_s_size_of_app_data_segment);
   __Pyx_GIVEREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_t_1);
+  PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_1);
   __pyx_t_1 = 0;
-  if (__Pyx_PrintOne(0, __pyx_t_2) < 0) __PYX_ERR(0, 42, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  if (__Pyx_PrintOne(0, __pyx_t_3) < 0) __PYX_ERR(0, 44, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "example_client.pyx":43
- * cpdef void client():
+  /* "example_client.pyx":45
+ *     t1=time.time()
  *     print("size of app data segment: \n", APP_SHM_SIZE);
  *     cdef int shmid = shmget(APP_SHM_KEY, 100,0666);             # <<<<<<<<<<<<<<
  *     print("hello")
@@ -1156,46 +1213,46 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
  */
   __pyx_v_shmid = shmget(APP_SHM_KEY, 0x64, 0666);
 
-  /* "example_client.pyx":44
+  /* "example_client.pyx":46
  *     print("size of app data segment: \n", APP_SHM_SIZE);
  *     cdef int shmid = shmget(APP_SHM_KEY, 100,0666);
  *     print("hello")             # <<<<<<<<<<<<<<
  *     if shmid < 0:
  *         print("client shmget")
  */
-  if (__Pyx_PrintOne(0, __pyx_n_s_hello) < 0) __PYX_ERR(0, 44, __pyx_L1_error)
+  if (__Pyx_PrintOne(0, __pyx_n_s_hello) < 0) __PYX_ERR(0, 46, __pyx_L1_error)
 
-  /* "example_client.pyx":45
+  /* "example_client.pyx":47
  *     cdef int shmid = shmget(APP_SHM_KEY, 100,0666);
  *     print("hello")
  *     if shmid < 0:             # <<<<<<<<<<<<<<
  *         print("client shmget")
  *         quit()
  */
-  __pyx_t_3 = ((__pyx_v_shmid < 0) != 0);
-  if (__pyx_t_3) {
+  __pyx_t_4 = ((__pyx_v_shmid < 0) != 0);
+  if (__pyx_t_4) {
 
-    /* "example_client.pyx":46
+    /* "example_client.pyx":48
  *     print("hello")
  *     if shmid < 0:
  *         print("client shmget")             # <<<<<<<<<<<<<<
  *         quit()
  *     print("Reached here 1")
  */
-    if (__Pyx_PrintOne(0, __pyx_kp_s_client_shmget) < 0) __PYX_ERR(0, 46, __pyx_L1_error)
+    if (__Pyx_PrintOne(0, __pyx_kp_s_client_shmget) < 0) __PYX_ERR(0, 48, __pyx_L1_error)
 
-    /* "example_client.pyx":47
+    /* "example_client.pyx":49
  *     if shmid < 0:
  *         print("client shmget")
  *         quit()             # <<<<<<<<<<<<<<
  *     print("Reached here 1")
  *     cdef AppData *shm = <AppData*>shmat(shmid, NULL, 0)
  */
-    __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_builtin_quit); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 47, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __pyx_t_3 = __Pyx_PyObject_CallNoArg(__pyx_builtin_quit); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 49, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "example_client.pyx":45
+    /* "example_client.pyx":47
  *     cdef int shmid = shmget(APP_SHM_KEY, 100,0666);
  *     print("hello")
  *     if shmid < 0:             # <<<<<<<<<<<<<<
@@ -1204,16 +1261,16 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
  */
   }
 
-  /* "example_client.pyx":48
+  /* "example_client.pyx":50
  *         print("client shmget")
  *         quit()
  *     print("Reached here 1")             # <<<<<<<<<<<<<<
  *     cdef AppData *shm = <AppData*>shmat(shmid, NULL, 0)
  *     print("Reached here 2")
  */
-  if (__Pyx_PrintOne(0, __pyx_kp_s_Reached_here_1) < 0) __PYX_ERR(0, 48, __pyx_L1_error)
+  if (__Pyx_PrintOne(0, __pyx_kp_s_Reached_here_1) < 0) __PYX_ERR(0, 50, __pyx_L1_error)
 
-  /* "example_client.pyx":49
+  /* "example_client.pyx":51
  *         quit()
  *     print("Reached here 1")
  *     cdef AppData *shm = <AppData*>shmat(shmid, NULL, 0)             # <<<<<<<<<<<<<<
@@ -1222,46 +1279,46 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
  */
   __pyx_v_shm = ((AppData *)shmat(__pyx_v_shmid, NULL, 0));
 
-  /* "example_client.pyx":50
+  /* "example_client.pyx":52
  *     print("Reached here 1")
  *     cdef AppData *shm = <AppData*>shmat(shmid, NULL, 0)
  *     print("Reached here 2")             # <<<<<<<<<<<<<<
  *     if (shm == <AppData *> 0):
  *         print("client shmat")
  */
-  if (__Pyx_PrintOne(0, __pyx_kp_s_Reached_here_2) < 0) __PYX_ERR(0, 50, __pyx_L1_error)
+  if (__Pyx_PrintOne(0, __pyx_kp_s_Reached_here_2) < 0) __PYX_ERR(0, 52, __pyx_L1_error)
 
-  /* "example_client.pyx":51
+  /* "example_client.pyx":53
  *     cdef AppData *shm = <AppData*>shmat(shmid, NULL, 0)
  *     print("Reached here 2")
  *     if (shm == <AppData *> 0):             # <<<<<<<<<<<<<<
  *         print("client shmat")
  *         quit()
  */
-  __pyx_t_3 = ((__pyx_v_shm == ((AppData *)0)) != 0);
-  if (__pyx_t_3) {
+  __pyx_t_4 = ((__pyx_v_shm == ((AppData *)0)) != 0);
+  if (__pyx_t_4) {
 
-    /* "example_client.pyx":52
+    /* "example_client.pyx":54
  *     print("Reached here 2")
  *     if (shm == <AppData *> 0):
  *         print("client shmat")             # <<<<<<<<<<<<<<
  *         quit()
  *     print("Reached here 3")
  */
-    if (__Pyx_PrintOne(0, __pyx_kp_s_client_shmat) < 0) __PYX_ERR(0, 52, __pyx_L1_error)
+    if (__Pyx_PrintOne(0, __pyx_kp_s_client_shmat) < 0) __PYX_ERR(0, 54, __pyx_L1_error)
 
-    /* "example_client.pyx":53
+    /* "example_client.pyx":55
  *     if (shm == <AppData *> 0):
  *         print("client shmat")
  *         quit()             # <<<<<<<<<<<<<<
  *     print("Reached here 3")
  *     cdef int latest_version=-1
  */
-    __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_builtin_quit); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 53, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __pyx_t_3 = __Pyx_PyObject_CallNoArg(__pyx_builtin_quit); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 55, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "example_client.pyx":51
+    /* "example_client.pyx":53
  *     cdef AppData *shm = <AppData*>shmat(shmid, NULL, 0)
  *     print("Reached here 2")
  *     if (shm == <AppData *> 0):             # <<<<<<<<<<<<<<
@@ -1270,16 +1327,16 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
  */
   }
 
-  /* "example_client.pyx":54
+  /* "example_client.pyx":56
  *         print("client shmat")
  *         quit()
  *     print("Reached here 3")             # <<<<<<<<<<<<<<
  *     cdef int latest_version=-1
  *     trans=["add","sub"]
  */
-  if (__Pyx_PrintOne(0, __pyx_kp_s_Reached_here_3) < 0) __PYX_ERR(0, 54, __pyx_L1_error)
+  if (__Pyx_PrintOne(0, __pyx_kp_s_Reached_here_3) < 0) __PYX_ERR(0, 56, __pyx_L1_error)
 
-  /* "example_client.pyx":55
+  /* "example_client.pyx":57
  *         quit()
  *     print("Reached here 3")
  *     cdef int latest_version=-1             # <<<<<<<<<<<<<<
@@ -1288,61 +1345,61 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
  */
   __pyx_v_latest_version = -1;
 
-  /* "example_client.pyx":56
+  /* "example_client.pyx":58
  *     print("Reached here 3")
  *     cdef int latest_version=-1
  *     trans=["add","sub"]             # <<<<<<<<<<<<<<
  *     trans_values=[10,15]
  *     lock_requirements=[0,1]
  */
-  __pyx_t_2 = PyList_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 56, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = PyList_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 58, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
   __Pyx_INCREF(__pyx_n_s_add);
   __Pyx_GIVEREF(__pyx_n_s_add);
-  PyList_SET_ITEM(__pyx_t_2, 0, __pyx_n_s_add);
+  PyList_SET_ITEM(__pyx_t_3, 0, __pyx_n_s_add);
   __Pyx_INCREF(__pyx_n_s_sub);
   __Pyx_GIVEREF(__pyx_n_s_sub);
-  PyList_SET_ITEM(__pyx_t_2, 1, __pyx_n_s_sub);
-  __pyx_v_trans = ((PyObject*)__pyx_t_2);
-  __pyx_t_2 = 0;
+  PyList_SET_ITEM(__pyx_t_3, 1, __pyx_n_s_sub);
+  __pyx_v_trans = ((PyObject*)__pyx_t_3);
+  __pyx_t_3 = 0;
 
-  /* "example_client.pyx":57
+  /* "example_client.pyx":59
  *     cdef int latest_version=-1
  *     trans=["add","sub"]
  *     trans_values=[10,15]             # <<<<<<<<<<<<<<
  *     lock_requirements=[0,1]
  *     cdef int done=0
  */
-  __pyx_t_2 = PyList_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 57, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = PyList_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 59, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
   __Pyx_INCREF(__pyx_int_10);
   __Pyx_GIVEREF(__pyx_int_10);
-  PyList_SET_ITEM(__pyx_t_2, 0, __pyx_int_10);
+  PyList_SET_ITEM(__pyx_t_3, 0, __pyx_int_10);
   __Pyx_INCREF(__pyx_int_15);
   __Pyx_GIVEREF(__pyx_int_15);
-  PyList_SET_ITEM(__pyx_t_2, 1, __pyx_int_15);
-  __pyx_v_trans_values = ((PyObject*)__pyx_t_2);
-  __pyx_t_2 = 0;
+  PyList_SET_ITEM(__pyx_t_3, 1, __pyx_int_15);
+  __pyx_v_trans_values = ((PyObject*)__pyx_t_3);
+  __pyx_t_3 = 0;
 
-  /* "example_client.pyx":58
+  /* "example_client.pyx":60
  *     trans=["add","sub"]
  *     trans_values=[10,15]
  *     lock_requirements=[0,1]             # <<<<<<<<<<<<<<
  *     cdef int done=0
  *     cdef int current=0
  */
-  __pyx_t_2 = PyList_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 58, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = PyList_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 60, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
   __Pyx_INCREF(__pyx_int_0);
   __Pyx_GIVEREF(__pyx_int_0);
-  PyList_SET_ITEM(__pyx_t_2, 0, __pyx_int_0);
+  PyList_SET_ITEM(__pyx_t_3, 0, __pyx_int_0);
   __Pyx_INCREF(__pyx_int_1);
   __Pyx_GIVEREF(__pyx_int_1);
-  PyList_SET_ITEM(__pyx_t_2, 1, __pyx_int_1);
-  __pyx_v_lock_requirements = ((PyObject*)__pyx_t_2);
-  __pyx_t_2 = 0;
+  PyList_SET_ITEM(__pyx_t_3, 1, __pyx_int_1);
+  __pyx_v_lock_requirements = ((PyObject*)__pyx_t_3);
+  __pyx_t_3 = 0;
 
-  /* "example_client.pyx":59
+  /* "example_client.pyx":61
  *     trans_values=[10,15]
  *     lock_requirements=[0,1]
  *     cdef int done=0             # <<<<<<<<<<<<<<
@@ -1351,7 +1408,7 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
  */
   __pyx_v_done = 0;
 
-  /* "example_client.pyx":60
+  /* "example_client.pyx":62
  *     lock_requirements=[0,1]
  *     cdef int done=0
  *     cdef int current=0             # <<<<<<<<<<<<<<
@@ -1360,17 +1417,17 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
  */
   __pyx_v_current = 0;
 
-  /* "example_client.pyx":61
+  /* "example_client.pyx":63
  *     cdef int done=0
  *     cdef int current=0
  *     cdef int bal=shm[0].account_balance             # <<<<<<<<<<<<<<
  *     while done!=2:
  *         prev=0
  */
-  __pyx_t_4 = (__pyx_v_shm[0]).account_balance;
-  __pyx_v_bal = __pyx_t_4;
+  __pyx_t_5 = (__pyx_v_shm[0]).account_balance;
+  __pyx_v_bal = __pyx_t_5;
 
-  /* "example_client.pyx":62
+  /* "example_client.pyx":64
  *     cdef int current=0
  *     cdef int bal=shm[0].account_balance
  *     while done!=2:             # <<<<<<<<<<<<<<
@@ -1378,10 +1435,10 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
  * 
  */
   while (1) {
-    __pyx_t_3 = ((__pyx_v_done != 2) != 0);
-    if (!__pyx_t_3) break;
+    __pyx_t_4 = ((__pyx_v_done != 2) != 0);
+    if (!__pyx_t_4) break;
 
-    /* "example_client.pyx":63
+    /* "example_client.pyx":65
  *     cdef int bal=shm[0].account_balance
  *     while done!=2:
  *         prev=0             # <<<<<<<<<<<<<<
@@ -1390,17 +1447,17 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
  */
     __pyx_v_prev = 0;
 
-    /* "example_client.pyx":65
+    /* "example_client.pyx":67
  *         prev=0
  * 
  *         if shm[0].version!= current:             # <<<<<<<<<<<<<<
  *             while shm[0].lock_required==1:
  *                 print("process 2 : wwaiting for other process to complete its transaction")
  */
-    __pyx_t_3 = (((__pyx_v_shm[0]).version != __pyx_v_current) != 0);
-    if (__pyx_t_3) {
+    __pyx_t_4 = (((__pyx_v_shm[0]).version != __pyx_v_current) != 0);
+    if (__pyx_t_4) {
 
-      /* "example_client.pyx":66
+      /* "example_client.pyx":68
  * 
  *         if shm[0].version!= current:
  *             while shm[0].lock_required==1:             # <<<<<<<<<<<<<<
@@ -1408,19 +1465,19 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
  *                 sleep(1)
  */
       while (1) {
-        __pyx_t_3 = (((__pyx_v_shm[0]).lock_required == 1) != 0);
-        if (!__pyx_t_3) break;
+        __pyx_t_4 = (((__pyx_v_shm[0]).lock_required == 1) != 0);
+        if (!__pyx_t_4) break;
 
-        /* "example_client.pyx":67
+        /* "example_client.pyx":69
  *         if shm[0].version!= current:
  *             while shm[0].lock_required==1:
  *                 print("process 2 : wwaiting for other process to complete its transaction")             # <<<<<<<<<<<<<<
  *                 sleep(1)
  * 
  */
-        if (__Pyx_PrintOne(0, __pyx_kp_s_process_2_wwaiting_for_other_pro) < 0) __PYX_ERR(0, 67, __pyx_L1_error)
+        if (__Pyx_PrintOne(0, __pyx_kp_s_process_2_wwaiting_for_other_pro) < 0) __PYX_ERR(0, 69, __pyx_L1_error)
 
-        /* "example_client.pyx":68
+        /* "example_client.pyx":70
  *             while shm[0].lock_required==1:
  *                 print("process 2 : wwaiting for other process to complete its transaction")
  *                 sleep(1)             # <<<<<<<<<<<<<<
@@ -1430,7 +1487,7 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
         (void)(sleep(1));
       }
 
-      /* "example_client.pyx":65
+      /* "example_client.pyx":67
  *         prev=0
  * 
  *         if shm[0].version!= current:             # <<<<<<<<<<<<<<
@@ -1439,98 +1496,98 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
  */
     }
 
-    /* "example_client.pyx":70
+    /* "example_client.pyx":72
  *                 sleep(1)
  * 
  *         print("process 2 : starting new transaction",trans[done])             # <<<<<<<<<<<<<<
  *         shm[0].lock_required=lock_requirements[done]
  *         current=shm[0].version
  */
-    __pyx_t_2 = __Pyx_GetItemInt_List(__pyx_v_trans, __pyx_v_done, int, 1, __Pyx_PyInt_From_int, 1, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 70, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 70, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_GetItemInt_List(__pyx_v_trans, __pyx_v_done, int, 1, __Pyx_PyInt_From_int, 1, 1, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 72, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 72, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_INCREF(__pyx_kp_s_process_2_starting_new_transacti);
     __Pyx_GIVEREF(__pyx_kp_s_process_2_starting_new_transacti);
     PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_kp_s_process_2_starting_new_transacti);
-    __Pyx_GIVEREF(__pyx_t_2);
-    PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_t_2);
-    __pyx_t_2 = 0;
-    if (__Pyx_PrintOne(0, __pyx_t_1) < 0) __PYX_ERR(0, 70, __pyx_L1_error)
+    __Pyx_GIVEREF(__pyx_t_3);
+    PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_t_3);
+    __pyx_t_3 = 0;
+    if (__Pyx_PrintOne(0, __pyx_t_1) < 0) __PYX_ERR(0, 72, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-    /* "example_client.pyx":71
+    /* "example_client.pyx":73
  * 
  *         print("process 2 : starting new transaction",trans[done])
  *         shm[0].lock_required=lock_requirements[done]             # <<<<<<<<<<<<<<
  *         current=shm[0].version
  *         bal=shm[0].account_balance
  */
-    __pyx_t_1 = __Pyx_GetItemInt_List(__pyx_v_lock_requirements, __pyx_v_done, int, 1, __Pyx_PyInt_From_int, 1, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 71, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_GetItemInt_List(__pyx_v_lock_requirements, __pyx_v_done, int, 1, __Pyx_PyInt_From_int, 1, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 73, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 71, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 73, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    (__pyx_v_shm[0]).lock_required = __pyx_t_4;
+    (__pyx_v_shm[0]).lock_required = __pyx_t_5;
 
-    /* "example_client.pyx":72
+    /* "example_client.pyx":74
  *         print("process 2 : starting new transaction",trans[done])
  *         shm[0].lock_required=lock_requirements[done]
  *         current=shm[0].version             # <<<<<<<<<<<<<<
  *         bal=shm[0].account_balance
  *         print("data version is ",shm[0].version,shm[0].account_balance)
  */
-    __pyx_t_4 = (__pyx_v_shm[0]).version;
-    __pyx_v_current = __pyx_t_4;
+    __pyx_t_5 = (__pyx_v_shm[0]).version;
+    __pyx_v_current = __pyx_t_5;
 
-    /* "example_client.pyx":73
+    /* "example_client.pyx":75
  *         shm[0].lock_required=lock_requirements[done]
  *         current=shm[0].version
  *         bal=shm[0].account_balance             # <<<<<<<<<<<<<<
  *         print("data version is ",shm[0].version,shm[0].account_balance)
  *         if trans[done]=="add":
  */
-    __pyx_t_4 = (__pyx_v_shm[0]).account_balance;
-    __pyx_v_bal = __pyx_t_4;
+    __pyx_t_5 = (__pyx_v_shm[0]).account_balance;
+    __pyx_v_bal = __pyx_t_5;
 
-    /* "example_client.pyx":74
+    /* "example_client.pyx":76
  *         current=shm[0].version
  *         bal=shm[0].account_balance
  *         print("data version is ",shm[0].version,shm[0].account_balance)             # <<<<<<<<<<<<<<
  *         if trans[done]=="add":
  *             bal=bal+25
  */
-    __pyx_t_1 = __Pyx_PyInt_From_int((__pyx_v_shm[0]).version); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 74, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyInt_From_int((__pyx_v_shm[0]).version); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 76, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_2 = __Pyx_PyInt_From_int((__pyx_v_shm[0]).account_balance); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 74, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyInt_From_int((__pyx_v_shm[0]).account_balance); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 76, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __pyx_t_2 = PyTuple_New(3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 76, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_5 = PyTuple_New(3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 74, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
     __Pyx_INCREF(__pyx_kp_s_data_version_is);
     __Pyx_GIVEREF(__pyx_kp_s_data_version_is);
-    PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_kp_s_data_version_is);
+    PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_kp_s_data_version_is);
     __Pyx_GIVEREF(__pyx_t_1);
-    PyTuple_SET_ITEM(__pyx_t_5, 1, __pyx_t_1);
-    __Pyx_GIVEREF(__pyx_t_2);
-    PyTuple_SET_ITEM(__pyx_t_5, 2, __pyx_t_2);
+    PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_t_1);
+    __Pyx_GIVEREF(__pyx_t_3);
+    PyTuple_SET_ITEM(__pyx_t_2, 2, __pyx_t_3);
     __pyx_t_1 = 0;
-    __pyx_t_2 = 0;
-    if (__Pyx_PrintOne(0, __pyx_t_5) < 0) __PYX_ERR(0, 74, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __pyx_t_3 = 0;
+    if (__Pyx_PrintOne(0, __pyx_t_2) < 0) __PYX_ERR(0, 76, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-    /* "example_client.pyx":75
+    /* "example_client.pyx":77
  *         bal=shm[0].account_balance
  *         print("data version is ",shm[0].version,shm[0].account_balance)
  *         if trans[done]=="add":             # <<<<<<<<<<<<<<
  *             bal=bal+25
  *             sleep(1)
  */
-    __pyx_t_5 = __Pyx_GetItemInt_List(__pyx_v_trans, __pyx_v_done, int, 1, __Pyx_PyInt_From_int, 1, 1, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 75, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_3 = (__Pyx_PyString_Equals(__pyx_t_5, __pyx_n_s_add, Py_EQ)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 75, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    if (__pyx_t_3) {
+    __pyx_t_2 = __Pyx_GetItemInt_List(__pyx_v_trans, __pyx_v_done, int, 1, __Pyx_PyInt_From_int, 1, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 77, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __pyx_t_4 = (__Pyx_PyString_Equals(__pyx_t_2, __pyx_n_s_add, Py_EQ)); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 77, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    if (__pyx_t_4) {
 
-      /* "example_client.pyx":76
+      /* "example_client.pyx":78
  *         print("data version is ",shm[0].version,shm[0].account_balance)
  *         if trans[done]=="add":
  *             bal=bal+25             # <<<<<<<<<<<<<<
@@ -1539,7 +1596,7 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
  */
       __pyx_v_bal = (__pyx_v_bal + 25);
 
-      /* "example_client.pyx":77
+      /* "example_client.pyx":79
  *         if trans[done]=="add":
  *             bal=bal+25
  *             sleep(1)             # <<<<<<<<<<<<<<
@@ -1548,7 +1605,7 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
  */
       (void)(sleep(1));
 
-      /* "example_client.pyx":75
+      /* "example_client.pyx":77
  *         bal=shm[0].account_balance
  *         print("data version is ",shm[0].version,shm[0].account_balance)
  *         if trans[done]=="add":             # <<<<<<<<<<<<<<
@@ -1558,20 +1615,20 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
       goto __pyx_L10;
     }
 
-    /* "example_client.pyx":78
+    /* "example_client.pyx":80
  *             bal=bal+25
  *             sleep(1)
  *         elif trans[done]=="sub":             # <<<<<<<<<<<<<<
  *             bal=bal-50
  *             sleep(2)
  */
-    __pyx_t_5 = __Pyx_GetItemInt_List(__pyx_v_trans, __pyx_v_done, int, 1, __Pyx_PyInt_From_int, 1, 1, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 78, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_3 = (__Pyx_PyString_Equals(__pyx_t_5, __pyx_n_s_sub, Py_EQ)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 78, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    if (__pyx_t_3) {
+    __pyx_t_2 = __Pyx_GetItemInt_List(__pyx_v_trans, __pyx_v_done, int, 1, __Pyx_PyInt_From_int, 1, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 80, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __pyx_t_4 = (__Pyx_PyString_Equals(__pyx_t_2, __pyx_n_s_sub, Py_EQ)); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 80, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    if (__pyx_t_4) {
 
-      /* "example_client.pyx":79
+      /* "example_client.pyx":81
  *             sleep(1)
  *         elif trans[done]=="sub":
  *             bal=bal-50             # <<<<<<<<<<<<<<
@@ -1580,7 +1637,7 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
  */
       __pyx_v_bal = (__pyx_v_bal - 50);
 
-      /* "example_client.pyx":80
+      /* "example_client.pyx":82
  *         elif trans[done]=="sub":
  *             bal=bal-50
  *             sleep(2)             # <<<<<<<<<<<<<<
@@ -1589,7 +1646,7 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
  */
       (void)(sleep(2));
 
-      /* "example_client.pyx":78
+      /* "example_client.pyx":80
  *             bal=bal+25
  *             sleep(1)
  *         elif trans[done]=="sub":             # <<<<<<<<<<<<<<
@@ -1599,27 +1656,27 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
     }
     __pyx_L10:;
 
-    /* "example_client.pyx":81
+    /* "example_client.pyx":83
  *             bal=bal-50
  *             sleep(2)
  *         if shm[0].version!=current:             # <<<<<<<<<<<<<<
  *             current=shm[0].version
  *             continue
  */
-    __pyx_t_3 = (((__pyx_v_shm[0]).version != __pyx_v_current) != 0);
-    if (__pyx_t_3) {
+    __pyx_t_4 = (((__pyx_v_shm[0]).version != __pyx_v_current) != 0);
+    if (__pyx_t_4) {
 
-      /* "example_client.pyx":82
+      /* "example_client.pyx":84
  *             sleep(2)
  *         if shm[0].version!=current:
  *             current=shm[0].version             # <<<<<<<<<<<<<<
  *             continue
  *         print("transaction complete from process 2 ")
  */
-      __pyx_t_4 = (__pyx_v_shm[0]).version;
-      __pyx_v_current = __pyx_t_4;
+      __pyx_t_5 = (__pyx_v_shm[0]).version;
+      __pyx_v_current = __pyx_t_5;
 
-      /* "example_client.pyx":83
+      /* "example_client.pyx":85
  *         if shm[0].version!=current:
  *             current=shm[0].version
  *             continue             # <<<<<<<<<<<<<<
@@ -1628,7 +1685,7 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
  */
       goto __pyx_L5_continue;
 
-      /* "example_client.pyx":81
+      /* "example_client.pyx":83
  *             bal=bal-50
  *             sleep(2)
  *         if shm[0].version!=current:             # <<<<<<<<<<<<<<
@@ -1637,16 +1694,16 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
  */
     }
 
-    /* "example_client.pyx":84
+    /* "example_client.pyx":86
  *             current=shm[0].version
  *             continue
  *         print("transaction complete from process 2 ")             # <<<<<<<<<<<<<<
  *         shm[0].account_balance=bal
  *         shm[0].version+=1
  */
-    if (__Pyx_PrintOne(0, __pyx_kp_s_transaction_complete_from_proces) < 0) __PYX_ERR(0, 84, __pyx_L1_error)
+    if (__Pyx_PrintOne(0, __pyx_kp_s_transaction_complete_from_proces) < 0) __PYX_ERR(0, 86, __pyx_L1_error)
 
-    /* "example_client.pyx":85
+    /* "example_client.pyx":87
  *             continue
  *         print("transaction complete from process 2 ")
  *         shm[0].account_balance=bal             # <<<<<<<<<<<<<<
@@ -1655,7 +1712,7 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
  */
     (__pyx_v_shm[0]).account_balance = __pyx_v_bal;
 
-    /* "example_client.pyx":86
+    /* "example_client.pyx":88
  *         print("transaction complete from process 2 ")
  *         shm[0].account_balance=bal
  *         shm[0].version+=1             # <<<<<<<<<<<<<<
@@ -1665,7 +1722,7 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
     __pyx_t_6 = 0;
     (__pyx_v_shm[__pyx_t_6]).version = ((__pyx_v_shm[__pyx_t_6]).version + 1);
 
-    /* "example_client.pyx":87
+    /* "example_client.pyx":89
  *         shm[0].account_balance=bal
  *         shm[0].version+=1
  *         shm[0].lock_required=0             # <<<<<<<<<<<<<<
@@ -1674,7 +1731,7 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
  */
     (__pyx_v_shm[0]).lock_required = 0;
 
-    /* "example_client.pyx":88
+    /* "example_client.pyx":90
  *         shm[0].version+=1
  *         shm[0].lock_required=0
  *         done+=1             # <<<<<<<<<<<<<<
@@ -1683,19 +1740,19 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
  */
     __pyx_v_done = (__pyx_v_done + 1);
 
-    /* "example_client.pyx":89
+    /* "example_client.pyx":91
  *         shm[0].lock_required=0
  *         done+=1
  *         print(shm[0].account_balance)             # <<<<<<<<<<<<<<
  *         sleep(2)
  * 
  */
-    __pyx_t_5 = __Pyx_PyInt_From_int((__pyx_v_shm[0]).account_balance); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 89, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    if (__Pyx_PrintOne(0, __pyx_t_5) < 0) __PYX_ERR(0, 89, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __pyx_t_2 = __Pyx_PyInt_From_int((__pyx_v_shm[0]).account_balance); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 91, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    if (__Pyx_PrintOne(0, __pyx_t_2) < 0) __PYX_ERR(0, 91, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-    /* "example_client.pyx":90
+    /* "example_client.pyx":92
  *         done+=1
  *         print(shm[0].account_balance)
  *         sleep(2)             # <<<<<<<<<<<<<<
@@ -1706,19 +1763,19 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
     __pyx_L5_continue:;
   }
 
-  /* "example_client.pyx":92
+  /* "example_client.pyx":94
  *         sleep(2)
  * 
  *     print(shm[0].account_balance)             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __pyx_t_5 = __Pyx_PyInt_From_int((__pyx_v_shm[0]).account_balance); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 92, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
-  if (__Pyx_PrintOne(0, __pyx_t_5) < 0) __PYX_ERR(0, 92, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+  __pyx_t_2 = __Pyx_PyInt_From_int((__pyx_v_shm[0]).account_balance); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 94, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (__Pyx_PrintOne(0, __pyx_t_2) < 0) __PYX_ERR(0, 94, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "example_client.pyx":97
+  /* "example_client.pyx":99
  * 
  * 
  *     sleep(2);             # <<<<<<<<<<<<<<
@@ -1727,7 +1784,7 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
  */
   (void)(sleep(2));
 
-  /* "example_client.pyx":98
+  /* "example_client.pyx":100
  * 
  *     sleep(2);
  *     shmdt(shm);             # <<<<<<<<<<<<<<
@@ -1736,38 +1793,92 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
  */
   (void)(shmdt(__pyx_v_shm));
 
-  /* "example_client.pyx":99
+  /* "example_client.pyx":101
  *     sleep(2);
  *     shmdt(shm);
  *     shmctl(shmid, IPC_RMID, NULL);             # <<<<<<<<<<<<<<
  *     print("client shutting down\n");
- *     quit()
+ * 
  */
   (void)(shmctl(__pyx_v_shmid, IPC_RMID, NULL));
 
-  /* "example_client.pyx":100
+  /* "example_client.pyx":102
  *     shmdt(shm);
  *     shmctl(shmid, IPC_RMID, NULL);
  *     print("client shutting down\n");             # <<<<<<<<<<<<<<
- *     quit()
+ * 
+ *     t2=time.time()
  */
-  if (__Pyx_PrintOne(0, __pyx_kp_s_client_shutting_down) < 0) __PYX_ERR(0, 100, __pyx_L1_error)
+  if (__Pyx_PrintOne(0, __pyx_kp_s_client_shutting_down) < 0) __PYX_ERR(0, 102, __pyx_L1_error)
 
-  /* "example_client.pyx":101
- *     shmctl(shmid, IPC_RMID, NULL);
+  /* "example_client.pyx":104
  *     print("client shutting down\n");
+ * 
+ *     t2=time.time()             # <<<<<<<<<<<<<<
+ *     print("here is the execution time",t2-t1)
+ * 
+ */
+  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_time); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 104, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_time); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 104, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_3 = NULL;
+  if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_1))) {
+    __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_1);
+    if (likely(__pyx_t_3)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_1);
+      __Pyx_INCREF(__pyx_t_3);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_1, function);
+    }
+  }
+  if (__pyx_t_3) {
+    __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 104, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  } else {
+    __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 104, __pyx_L1_error)
+  }
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_v_t2 = __pyx_t_2;
+  __pyx_t_2 = 0;
+
+  /* "example_client.pyx":105
+ * 
+ *     t2=time.time()
+ *     print("here is the execution time",t2-t1)             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+  __pyx_t_2 = PyNumber_Subtract(__pyx_v_t2, __pyx_v_t1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 105, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 105, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_INCREF(__pyx_kp_s_here_is_the_execution_time);
+  __Pyx_GIVEREF(__pyx_kp_s_here_is_the_execution_time);
+  PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_kp_s_here_is_the_execution_time);
+  __Pyx_GIVEREF(__pyx_t_2);
+  PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_t_2);
+  __pyx_t_2 = 0;
+  if (__Pyx_PrintOne(0, __pyx_t_1) < 0) __PYX_ERR(0, 105, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+
+  /* "example_client.pyx":108
+ * 
+ * 
  *     quit()             # <<<<<<<<<<<<<<
  */
-  __pyx_t_5 = __Pyx_PyObject_CallNoArg(__pyx_builtin_quit); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 101, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+  __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_builtin_quit); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 108, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "example_client.pyx":41
+  /* "example_client.pyx":42
  *     int APP_SHM_SIZE
  * 
  * cpdef void client():             # <<<<<<<<<<<<<<
+ *     t1=time.time()
  *     print("size of app data segment: \n", APP_SHM_SIZE);
- *     cdef int shmid = shmget(APP_SHM_KEY, 100,0666);
  */
 
   /* function exit code */
@@ -1775,12 +1886,14 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_XDECREF(__pyx_t_5);
+  __Pyx_XDECREF(__pyx_t_3);
   __Pyx_WriteUnraisable("example_client.client", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
   __pyx_L0:;
+  __Pyx_XDECREF(__pyx_v_t1);
   __Pyx_XDECREF(__pyx_v_trans);
   __Pyx_XDECREF(__pyx_v_trans_values);
   __Pyx_XDECREF(__pyx_v_lock_requirements);
+  __Pyx_XDECREF(__pyx_v_t2);
   __Pyx_RefNannyFinishContext();
 }
 
@@ -1803,7 +1916,7 @@ static PyObject *__pyx_pf_14example_client_client(CYTHON_UNUSED PyObject *__pyx_
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("client", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_void_to_None(__pyx_f_14example_client_client(0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 41, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_void_to_None(__pyx_f_14example_client_client(0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 42, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -1870,6 +1983,8 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_end, __pyx_k_end, sizeof(__pyx_k_end), 0, 0, 1, 1},
   {&__pyx_n_s_file, __pyx_k_file, sizeof(__pyx_k_file), 0, 0, 1, 1},
   {&__pyx_n_s_hello, __pyx_k_hello, sizeof(__pyx_k_hello), 0, 0, 1, 1},
+  {&__pyx_kp_s_here_is_the_execution_time, __pyx_k_here_is_the_execution_time, sizeof(__pyx_k_here_is_the_execution_time), 0, 0, 1, 0},
+  {&__pyx_n_s_import, __pyx_k_import, sizeof(__pyx_k_import), 0, 0, 1, 1},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
   {&__pyx_n_s_print, __pyx_k_print, sizeof(__pyx_k_print), 0, 0, 1, 1},
   {&__pyx_kp_s_process_2_starting_new_transacti, __pyx_k_process_2_starting_new_transacti, sizeof(__pyx_k_process_2_starting_new_transacti), 0, 0, 1, 0},
@@ -1878,11 +1993,12 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_s_size_of_app_data_segment, __pyx_k_size_of_app_data_segment, sizeof(__pyx_k_size_of_app_data_segment), 0, 0, 1, 0},
   {&__pyx_n_s_sub, __pyx_k_sub, sizeof(__pyx_k_sub), 0, 0, 1, 1},
   {&__pyx_n_s_test, __pyx_k_test, sizeof(__pyx_k_test), 0, 0, 1, 1},
+  {&__pyx_n_s_time, __pyx_k_time, sizeof(__pyx_k_time), 0, 0, 1, 1},
   {&__pyx_kp_s_transaction_complete_from_proces, __pyx_k_transaction_complete_from_proces, sizeof(__pyx_k_transaction_complete_from_proces), 0, 0, 1, 0},
   {0, 0, 0, 0, 0, 0, 0}
 };
 static int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_quit = __Pyx_GetBuiltinName(__pyx_n_s_quit); if (!__pyx_builtin_quit) __PYX_ERR(0, 47, __pyx_L1_error)
+  __pyx_builtin_quit = __Pyx_GetBuiltinName(__pyx_n_s_quit); if (!__pyx_builtin_quit) __PYX_ERR(0, 49, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
   return -1;
@@ -2144,9 +2260,21 @@ if (!__Pyx_RefNanny) {
   #endif
 
   /* "example_client.pyx":1
- * cdef extern from "string.h":             # <<<<<<<<<<<<<<
+ * import time             # <<<<<<<<<<<<<<
+ * cdef extern from "string.h":
  *     void memset(void *addr, int val, size_t len)
- *     void memcpy(void *trg, void *src, size_t len)
+ */
+  __pyx_t_1 = __Pyx_Import(__pyx_n_s_time, 0, -1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_time, __pyx_t_1) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+
+  /* "example_client.pyx":42
+ *     int APP_SHM_SIZE
+ * 
+ * cpdef void client():             # <<<<<<<<<<<<<<
+ *     t1=time.time()
+ *     print("size of app data segment: \n", APP_SHM_SIZE);
  */
   __pyx_t_1 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
@@ -2223,8 +2351,58 @@ static PyObject *__Pyx_GetBuiltinName(PyObject *name) {
     return result;
 }
 
+/* GetModuleGlobalName */
+static CYTHON_INLINE PyObject *__Pyx_GetModuleGlobalName(PyObject *name) {
+    PyObject *result;
+#if !CYTHON_AVOID_BORROWED_REFS
+#if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030500A1
+    result = _PyDict_GetItem_KnownHash(__pyx_d, name, ((PyASCIIObject *) name)->hash);
+    if (likely(result)) {
+        Py_INCREF(result);
+    } else if (unlikely(PyErr_Occurred())) {
+        result = NULL;
+    } else {
+#else
+    result = PyDict_GetItem(__pyx_d, name);
+    if (likely(result)) {
+        Py_INCREF(result);
+    } else {
+#endif
+#else
+    result = PyObject_GetItem(__pyx_d, name);
+    if (!result) {
+        PyErr_Clear();
+#endif
+        result = __Pyx_GetBuiltinName(name);
+    }
+    return result;
+}
+
+/* PyCFunctionFastCall */
+    #if CYTHON_FAST_PYCCALL
+static CYTHON_INLINE PyObject * __Pyx_PyCFunction_FastCall(PyObject *func_obj, PyObject **args, Py_ssize_t nargs) {
+    PyCFunctionObject *func = (PyCFunctionObject*)func_obj;
+    PyCFunction meth = PyCFunction_GET_FUNCTION(func);
+    PyObject *self = PyCFunction_GET_SELF(func);
+    int flags = PyCFunction_GET_FLAGS(func);
+    assert(PyCFunction_Check(func));
+    assert(METH_FASTCALL == (flags & ~(METH_CLASS | METH_STATIC | METH_COEXIST | METH_KEYWORDS)));
+    assert(nargs >= 0);
+    assert(nargs == 0 || args != NULL);
+    /* _PyCFunction_FastCallDict() must not be called with an exception set,
+       because it may clear it (directly or indirectly) and so the
+       caller loses its exception */
+    assert(!PyErr_Occurred());
+    if ((PY_VERSION_HEX < 0x030700A0) || unlikely(flags & METH_KEYWORDS)) {
+        return (*((__Pyx_PyCFunctionFastWithKeywords)meth)) (self, args, nargs, NULL);
+    } else {
+        return (*((__Pyx_PyCFunctionFast)meth)) (self, args, nargs);
+    }
+}
+#endif
+
 /* PyFunctionFastCall */
-#if CYTHON_FAST_PYCALL
+    #if CYTHON_FAST_PYCALL
 #include "frameobject.h"
 static PyObject* __Pyx_PyFunction_FastCallNoKw(PyCodeObject *co, PyObject **args, Py_ssize_t na,
                                                PyObject *globals) {
@@ -2344,7 +2522,7 @@ done:
 #endif
 
 /* PyObjectCall */
-#if CYTHON_COMPILING_IN_CPYTHON
+    #if CYTHON_COMPILING_IN_CPYTHON
 static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg, PyObject *kw) {
     PyObject *result;
     ternaryfunc call = func->ob_type->tp_call;
@@ -2364,7 +2542,7 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg
 #endif
 
 /* PyObjectCallMethO */
-#if CYTHON_COMPILING_IN_CPYTHON
+    #if CYTHON_COMPILING_IN_CPYTHON
 static CYTHON_INLINE PyObject* __Pyx_PyObject_CallMethO(PyObject *func, PyObject *arg) {
     PyObject *self, *result;
     PyCFunction cfunc;
@@ -2383,8 +2561,48 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_CallMethO(PyObject *func, PyObject
 }
 #endif
 
+/* PyObjectCallOneArg */
+    #if CYTHON_COMPILING_IN_CPYTHON
+static PyObject* __Pyx__PyObject_CallOneArg(PyObject *func, PyObject *arg) {
+    PyObject *result;
+    PyObject *args = PyTuple_New(1);
+    if (unlikely(!args)) return NULL;
+    Py_INCREF(arg);
+    PyTuple_SET_ITEM(args, 0, arg);
+    result = __Pyx_PyObject_Call(func, args, NULL);
+    Py_DECREF(args);
+    return result;
+}
+static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObject *arg) {
+#if CYTHON_FAST_PYCALL
+    if (PyFunction_Check(func)) {
+        return __Pyx_PyFunction_FastCall(func, &arg, 1);
+    }
+#endif
+    if (likely(PyCFunction_Check(func))) {
+        if (likely(PyCFunction_GET_FLAGS(func) & METH_O)) {
+            return __Pyx_PyObject_CallMethO(func, arg);
+#if CYTHON_FAST_PYCCALL
+        } else if (PyCFunction_GET_FLAGS(func) & METH_FASTCALL) {
+            return __Pyx_PyCFunction_FastCall(func, &arg, 1);
+#endif
+        }
+    }
+    return __Pyx__PyObject_CallOneArg(func, arg);
+}
+#else
+static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObject *arg) {
+    PyObject *result;
+    PyObject *args = PyTuple_Pack(1, arg);
+    if (unlikely(!args)) return NULL;
+    result = __Pyx_PyObject_Call(func, args, NULL);
+    Py_DECREF(args);
+    return result;
+}
+#endif
+
 /* PyObjectCallNoArg */
-#if CYTHON_COMPILING_IN_CPYTHON
+    #if CYTHON_COMPILING_IN_CPYTHON
 static CYTHON_INLINE PyObject* __Pyx_PyObject_CallNoArg(PyObject *func) {
 #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(func)) {
@@ -2405,7 +2623,7 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_CallNoArg(PyObject *func) {
 #endif
 
 /* GetItemInt */
-  static PyObject *__Pyx_GetItemInt_Generic(PyObject *o, PyObject* j) {
+      static PyObject *__Pyx_GetItemInt_Generic(PyObject *o, PyObject* j) {
     PyObject *r;
     if (!j) return NULL;
     r = PyObject_GetItem(o, j);
@@ -2492,7 +2710,7 @@ static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Fast(PyObject *o, Py_ssize_t i, 
 }
 
 /* BytesEquals */
-  static CYTHON_INLINE int __Pyx_PyBytes_Equals(PyObject* s1, PyObject* s2, int equals) {
+      static CYTHON_INLINE int __Pyx_PyBytes_Equals(PyObject* s1, PyObject* s2, int equals) {
 #if CYTHON_COMPILING_IN_PYPY
     return PyObject_RichCompareBool(s1, s2, equals);
 #else
@@ -2539,7 +2757,7 @@ static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Fast(PyObject *o, Py_ssize_t i, 
 }
 
 /* UnicodeEquals */
-  static CYTHON_INLINE int __Pyx_PyUnicode_Equals(PyObject* s1, PyObject* s2, int equals) {
+      static CYTHON_INLINE int __Pyx_PyUnicode_Equals(PyObject* s1, PyObject* s2, int equals) {
 #if CYTHON_COMPILING_IN_PYPY
     return PyObject_RichCompareBool(s1, s2, equals);
 #else
@@ -2638,7 +2856,7 @@ return_ne:
 }
 
 /* PyErrFetchRestore */
-  #if CYTHON_FAST_THREAD_STATE
+      #if CYTHON_FAST_THREAD_STATE
 static CYTHON_INLINE void __Pyx_ErrRestoreInState(PyThreadState *tstate, PyObject *type, PyObject *value, PyObject *tb) {
     PyObject *tmp_type, *tmp_value, *tmp_tb;
     tmp_type = tstate->curexc_type;
@@ -2662,7 +2880,7 @@ static CYTHON_INLINE void __Pyx_ErrFetchInState(PyThreadState *tstate, PyObject 
 #endif
 
 /* WriteUnraisableException */
-  static void __Pyx_WriteUnraisable(const char *name, CYTHON_UNUSED int clineno,
+      static void __Pyx_WriteUnraisable(const char *name, CYTHON_UNUSED int clineno,
                                   CYTHON_UNUSED int lineno, CYTHON_UNUSED const char *filename,
                                   int full_traceback, CYTHON_UNUSED int nogil) {
     PyObject *old_exc, *old_val, *old_tb;
@@ -2703,8 +2921,73 @@ static CYTHON_INLINE void __Pyx_ErrFetchInState(PyThreadState *tstate, PyObject 
 #endif
 }
 
+/* Import */
+      static PyObject *__Pyx_Import(PyObject *name, PyObject *from_list, int level) {
+    PyObject *empty_list = 0;
+    PyObject *module = 0;
+    PyObject *global_dict = 0;
+    PyObject *empty_dict = 0;
+    PyObject *list;
+    #if PY_MAJOR_VERSION < 3
+    PyObject *py_import;
+    py_import = __Pyx_PyObject_GetAttrStr(__pyx_b, __pyx_n_s_import);
+    if (!py_import)
+        goto bad;
+    #endif
+    if (from_list)
+        list = from_list;
+    else {
+        empty_list = PyList_New(0);
+        if (!empty_list)
+            goto bad;
+        list = empty_list;
+    }
+    global_dict = PyModule_GetDict(__pyx_m);
+    if (!global_dict)
+        goto bad;
+    empty_dict = PyDict_New();
+    if (!empty_dict)
+        goto bad;
+    {
+        #if PY_MAJOR_VERSION >= 3
+        if (level == -1) {
+            if (strchr(__Pyx_MODULE_NAME, '.')) {
+                module = PyImport_ImportModuleLevelObject(
+                    name, global_dict, empty_dict, list, 1);
+                if (!module) {
+                    if (!PyErr_ExceptionMatches(PyExc_ImportError))
+                        goto bad;
+                    PyErr_Clear();
+                }
+            }
+            level = 0;
+        }
+        #endif
+        if (!module) {
+            #if PY_MAJOR_VERSION < 3
+            PyObject *py_level = PyInt_FromLong(level);
+            if (!py_level)
+                goto bad;
+            module = PyObject_CallFunctionObjArgs(py_import,
+                name, global_dict, empty_dict, list, py_level, NULL);
+            Py_DECREF(py_level);
+            #else
+            module = PyImport_ImportModuleLevelObject(
+                name, global_dict, empty_dict, list, level);
+            #endif
+        }
+    }
+bad:
+    #if PY_MAJOR_VERSION < 3
+    Py_XDECREF(py_import);
+    #endif
+    Py_XDECREF(empty_list);
+    Py_XDECREF(empty_dict);
+    return module;
+}
+
 /* CLineInTraceback */
-  #ifndef CYTHON_CLINE_IN_TRACEBACK
+      #ifndef CYTHON_CLINE_IN_TRACEBACK
 static int __Pyx_CLineForTraceback(CYTHON_UNUSED PyThreadState *tstate, int c_line) {
     PyObject *use_cline;
     PyObject *ptype, *pvalue, *ptraceback;
@@ -2741,7 +3024,7 @@ static int __Pyx_CLineForTraceback(CYTHON_UNUSED PyThreadState *tstate, int c_li
 #endif
 
 /* CodeObjectCache */
-  static int __pyx_bisect_code_objects(__Pyx_CodeObjectCacheEntry* entries, int count, int code_line) {
+      static int __pyx_bisect_code_objects(__Pyx_CodeObjectCacheEntry* entries, int count, int code_line) {
     int start = 0, mid = 0, end = count - 1;
     if (end >= 0 && code_line > entries[end].code_line) {
         return count;
@@ -2821,7 +3104,7 @@ static void __pyx_insert_code_object(int code_line, PyCodeObject* code_object) {
 }
 
 /* AddTraceback */
-  #include "compile.h"
+      #include "compile.h"
 #include "frameobject.h"
 #include "traceback.h"
 static PyCodeObject* __Pyx_CreateCodeObjectForTraceback(
@@ -2906,7 +3189,7 @@ bad:
 }
 
 /* CIntToPy */
-  static CYTHON_INLINE PyObject* __Pyx_PyInt_From_int(int value) {
+      static CYTHON_INLINE PyObject* __Pyx_PyInt_From_int(int value) {
     const int neg_one = (int) -1, const_zero = (int) 0;
     const int is_unsigned = neg_one > const_zero;
     if (is_unsigned) {
@@ -2937,7 +3220,7 @@ bad:
 }
 
 /* Print */
-  #if !CYTHON_COMPILING_IN_PYPY && PY_MAJOR_VERSION < 3
+      #if !CYTHON_COMPILING_IN_PYPY && PY_MAJOR_VERSION < 3
 static PyObject *__Pyx_GetStdout(void) {
     PyObject *f = PySys_GetObject((char *)"stdout");
     if (!f) {
@@ -3043,7 +3326,7 @@ bad:
 #endif
 
 /* CIntFromPyVerify */
-  #define __PYX_VERIFY_RETURN_INT(target_type, func_type, func_value)\
+      #define __PYX_VERIFY_RETURN_INT(target_type, func_type, func_value)\
     __PYX__VERIFY_RETURN_INT(target_type, func_type, func_value, 0)
 #define __PYX_VERIFY_RETURN_INT_EXC(target_type, func_type, func_value)\
     __PYX__VERIFY_RETURN_INT(target_type, func_type, func_value, 1)
@@ -3065,7 +3348,7 @@ bad:
     }
 
 /* PrintOne */
-  #if !CYTHON_COMPILING_IN_PYPY && PY_MAJOR_VERSION < 3
+      #if !CYTHON_COMPILING_IN_PYPY && PY_MAJOR_VERSION < 3
 static int __Pyx_PrintOne(PyObject* f, PyObject *o) {
     if (!f) {
         if (!(f = __Pyx_GetStdout()))
@@ -3102,7 +3385,7 @@ static int __Pyx_PrintOne(PyObject* stream, PyObject *o) {
 #endif
 
 /* CIntFromPy */
-  static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *x) {
+      static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *x) {
     const int neg_one = (int) -1, const_zero = (int) 0;
     const int is_unsigned = neg_one > const_zero;
 #if PY_MAJOR_VERSION < 3
@@ -3291,7 +3574,7 @@ raise_neg_overflow:
 }
 
 /* CIntToPy */
-  static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value) {
+      static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value) {
     const long neg_one = (long) -1, const_zero = (long) 0;
     const int is_unsigned = neg_one > const_zero;
     if (is_unsigned) {
@@ -3322,7 +3605,7 @@ raise_neg_overflow:
 }
 
 /* CIntFromPy */
-  static CYTHON_INLINE long __Pyx_PyInt_As_long(PyObject *x) {
+      static CYTHON_INLINE long __Pyx_PyInt_As_long(PyObject *x) {
     const long neg_one = (long) -1, const_zero = (long) 0;
     const int is_unsigned = neg_one > const_zero;
 #if PY_MAJOR_VERSION < 3
@@ -3511,7 +3794,7 @@ raise_neg_overflow:
 }
 
 /* FastTypeChecks */
-  #if CYTHON_COMPILING_IN_CPYTHON
+      #if CYTHON_COMPILING_IN_CPYTHON
 static int __Pyx_InBases(PyTypeObject *a, PyTypeObject *b) {
     while (a) {
         a = a->tp_base;
@@ -3583,7 +3866,7 @@ static CYTHON_INLINE int __Pyx_PyErr_GivenExceptionMatches2(PyObject *err, PyObj
 #endif
 
 /* CheckBinaryVersion */
-  static int __Pyx_check_binary_version(void) {
+      static int __Pyx_check_binary_version(void) {
     char ctversion[4], rtversion[4];
     PyOS_snprintf(ctversion, 4, "%d.%d", PY_MAJOR_VERSION, PY_MINOR_VERSION);
     PyOS_snprintf(rtversion, 4, "%s", Py_GetVersion());
@@ -3599,7 +3882,7 @@ static CYTHON_INLINE int __Pyx_PyErr_GivenExceptionMatches2(PyObject *err, PyObj
 }
 
 /* InitStrings */
-  static int __Pyx_InitStrings(__Pyx_StringTabEntry *t) {
+      static int __Pyx_InitStrings(__Pyx_StringTabEntry *t) {
     while (t->p) {
         #if PY_MAJOR_VERSION < 3
         if (t->is_unicode) {

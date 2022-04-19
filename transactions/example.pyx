@@ -1,3 +1,4 @@
+import time
 cdef extern from "string.h":
     void memset(void *addr, int val, size_t len)
     void memcpy(void *trg, void *src, size_t len)
@@ -39,6 +40,7 @@ cdef extern from "defs.h":
     int APP_SHM_SIZE
     
 cpdef void server():
+    t1=time.time()
     print("size of app data segment: \n", APP_SHM_SIZE);
     cdef int shmid = shmget(APP_SHM_KEY, 100, IPC_CREAT| 0666)
     print(shmid)
@@ -107,4 +109,6 @@ cpdef void server():
     
     shmdt(shm)
     shmctl(shmid,IPC_RMID,NULL)
+    t2=time.time()
+    print("here is the execution time",t2-t1)
     quit()
