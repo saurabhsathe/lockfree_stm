@@ -58,6 +58,7 @@ cpdef void client():
     lock_requirements=[0,1]
     cdef int done=0
     cdef int current=0
+    cdef int bal=shm[0].account_balance
     while done!=2:
         prev=0
         
@@ -67,18 +68,22 @@ cpdef void client():
                 sleep(1)
             
         print("process 2 : starting new transaction",trans[done])
-        shm[0].version+=1
         shm[0].lock_required=lock_requirements[done]
         current=shm[0].version
-        sleep(2)
+        bal=shm[0].account_balance
         print("data version is ",shm[0].version,shm[0].account_balance)
         if trans[done]=="add":
-            shm[0].account_balance=shm[0].account_balance+25
+            bal=bal+25
             sleep(1)
         elif trans[done]=="sub":
-            shm[0].account_balance=shm[0].account_balance-50
+            bal=bal-50
             sleep(2)
+        if shm[0].version!=current:
+            current=shm[0].version
+            continue
         print("transaction complete from process 2 ")
+        shm[0].account_balance=bal
+        shm[0].version+=1
         shm[0].lock_required=0
         done+=1
         print(shm[0].account_balance)

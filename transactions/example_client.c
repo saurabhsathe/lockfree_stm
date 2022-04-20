@@ -1116,14 +1116,15 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
   PyObject *__pyx_v_lock_requirements = NULL;
   int __pyx_v_done;
   int __pyx_v_current;
+  int __pyx_v_bal;
   CYTHON_UNUSED long __pyx_v_prev;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
   PyObject *__pyx_t_2 = NULL;
   int __pyx_t_3;
-  long __pyx_t_4;
-  int __pyx_t_5;
-  PyObject *__pyx_t_6 = NULL;
+  int __pyx_t_4;
+  PyObject *__pyx_t_5 = NULL;
+  long __pyx_t_6;
   __Pyx_RefNannySetupContext("client", 0);
 
   /* "example_client.pyx":42
@@ -1346,7 +1347,7 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
  *     lock_requirements=[0,1]
  *     cdef int done=0             # <<<<<<<<<<<<<<
  *     cdef int current=0
- *     while done!=2:
+ *     cdef int bal=shm[0].account_balance
  */
   __pyx_v_done = 0;
 
@@ -1354,14 +1355,24 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
  *     lock_requirements=[0,1]
  *     cdef int done=0
  *     cdef int current=0             # <<<<<<<<<<<<<<
+ *     cdef int bal=shm[0].account_balance
  *     while done!=2:
- *         prev=0
  */
   __pyx_v_current = 0;
 
   /* "example_client.pyx":61
  *     cdef int done=0
  *     cdef int current=0
+ *     cdef int bal=shm[0].account_balance             # <<<<<<<<<<<<<<
+ *     while done!=2:
+ *         prev=0
+ */
+  __pyx_t_4 = (__pyx_v_shm[0]).account_balance;
+  __pyx_v_bal = __pyx_t_4;
+
+  /* "example_client.pyx":62
+ *     cdef int current=0
+ *     cdef int bal=shm[0].account_balance
  *     while done!=2:             # <<<<<<<<<<<<<<
  *         prev=0
  * 
@@ -1370,8 +1381,8 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
     __pyx_t_3 = ((__pyx_v_done != 2) != 0);
     if (!__pyx_t_3) break;
 
-    /* "example_client.pyx":62
- *     cdef int current=0
+    /* "example_client.pyx":63
+ *     cdef int bal=shm[0].account_balance
  *     while done!=2:
  *         prev=0             # <<<<<<<<<<<<<<
  * 
@@ -1379,7 +1390,7 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
  */
     __pyx_v_prev = 0;
 
-    /* "example_client.pyx":64
+    /* "example_client.pyx":65
  *         prev=0
  * 
  *         if shm[0].version!= current:             # <<<<<<<<<<<<<<
@@ -1389,7 +1400,7 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
     __pyx_t_3 = (((__pyx_v_shm[0]).version != __pyx_v_current) != 0);
     if (__pyx_t_3) {
 
-      /* "example_client.pyx":65
+      /* "example_client.pyx":66
  * 
  *         if shm[0].version!= current:
  *             while shm[0].lock_required==1:             # <<<<<<<<<<<<<<
@@ -1400,16 +1411,16 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
         __pyx_t_3 = (((__pyx_v_shm[0]).lock_required == 1) != 0);
         if (!__pyx_t_3) break;
 
-        /* "example_client.pyx":66
+        /* "example_client.pyx":67
  *         if shm[0].version!= current:
  *             while shm[0].lock_required==1:
  *                 print("process 2 : wwaiting for other process to complete its transaction")             # <<<<<<<<<<<<<<
  *                 sleep(1)
  * 
  */
-        if (__Pyx_PrintOne(0, __pyx_kp_s_process_2_wwaiting_for_other_pro) < 0) __PYX_ERR(0, 66, __pyx_L1_error)
+        if (__Pyx_PrintOne(0, __pyx_kp_s_process_2_wwaiting_for_other_pro) < 0) __PYX_ERR(0, 67, __pyx_L1_error)
 
-        /* "example_client.pyx":67
+        /* "example_client.pyx":68
  *             while shm[0].lock_required==1:
  *                 print("process 2 : wwaiting for other process to complete its transaction")
  *                 sleep(1)             # <<<<<<<<<<<<<<
@@ -1419,7 +1430,7 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
         (void)(sleep(1));
       }
 
-      /* "example_client.pyx":64
+      /* "example_client.pyx":65
  *         prev=0
  * 
  *         if shm[0].version!= current:             # <<<<<<<<<<<<<<
@@ -1428,16 +1439,16 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
  */
     }
 
-    /* "example_client.pyx":69
+    /* "example_client.pyx":70
  *                 sleep(1)
  * 
  *         print("process 2 : starting new transaction",trans[done])             # <<<<<<<<<<<<<<
- *         shm[0].version+=1
  *         shm[0].lock_required=lock_requirements[done]
+ *         current=shm[0].version
  */
-    __pyx_t_2 = __Pyx_GetItemInt_List(__pyx_v_trans, __pyx_v_done, int, 1, __Pyx_PyInt_From_int, 1, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 69, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_GetItemInt_List(__pyx_v_trans, __pyx_v_done, int, 1, __Pyx_PyInt_From_int, 1, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 70, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 69, __pyx_L1_error)
+    __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 70, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_INCREF(__pyx_kp_s_process_2_starting_new_transacti);
     __Pyx_GIVEREF(__pyx_kp_s_process_2_starting_new_transacti);
@@ -1445,178 +1456,226 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
     __Pyx_GIVEREF(__pyx_t_2);
     PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_t_2);
     __pyx_t_2 = 0;
-    if (__Pyx_PrintOne(0, __pyx_t_1) < 0) __PYX_ERR(0, 69, __pyx_L1_error)
+    if (__Pyx_PrintOne(0, __pyx_t_1) < 0) __PYX_ERR(0, 70, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-    /* "example_client.pyx":70
+    /* "example_client.pyx":71
  * 
  *         print("process 2 : starting new transaction",trans[done])
- *         shm[0].version+=1             # <<<<<<<<<<<<<<
- *         shm[0].lock_required=lock_requirements[done]
- *         current=shm[0].version
- */
-    __pyx_t_4 = 0;
-    (__pyx_v_shm[__pyx_t_4]).version = ((__pyx_v_shm[__pyx_t_4]).version + 1);
-
-    /* "example_client.pyx":71
- *         print("process 2 : starting new transaction",trans[done])
- *         shm[0].version+=1
  *         shm[0].lock_required=lock_requirements[done]             # <<<<<<<<<<<<<<
  *         current=shm[0].version
- *         sleep(2)
+ *         bal=shm[0].account_balance
  */
     __pyx_t_1 = __Pyx_GetItemInt_List(__pyx_v_lock_requirements, __pyx_v_done, int, 1, __Pyx_PyInt_From_int, 1, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 71, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 71, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 71, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    (__pyx_v_shm[0]).lock_required = __pyx_t_5;
+    (__pyx_v_shm[0]).lock_required = __pyx_t_4;
 
     /* "example_client.pyx":72
- *         shm[0].version+=1
+ *         print("process 2 : starting new transaction",trans[done])
  *         shm[0].lock_required=lock_requirements[done]
  *         current=shm[0].version             # <<<<<<<<<<<<<<
- *         sleep(2)
+ *         bal=shm[0].account_balance
  *         print("data version is ",shm[0].version,shm[0].account_balance)
  */
-    __pyx_t_5 = (__pyx_v_shm[0]).version;
-    __pyx_v_current = __pyx_t_5;
+    __pyx_t_4 = (__pyx_v_shm[0]).version;
+    __pyx_v_current = __pyx_t_4;
 
     /* "example_client.pyx":73
  *         shm[0].lock_required=lock_requirements[done]
  *         current=shm[0].version
- *         sleep(2)             # <<<<<<<<<<<<<<
+ *         bal=shm[0].account_balance             # <<<<<<<<<<<<<<
  *         print("data version is ",shm[0].version,shm[0].account_balance)
  *         if trans[done]=="add":
  */
-    (void)(sleep(2));
+    __pyx_t_4 = (__pyx_v_shm[0]).account_balance;
+    __pyx_v_bal = __pyx_t_4;
 
     /* "example_client.pyx":74
  *         current=shm[0].version
- *         sleep(2)
+ *         bal=shm[0].account_balance
  *         print("data version is ",shm[0].version,shm[0].account_balance)             # <<<<<<<<<<<<<<
  *         if trans[done]=="add":
- *             shm[0].account_balance=shm[0].account_balance+25
+ *             bal=bal+25
  */
     __pyx_t_1 = __Pyx_PyInt_From_int((__pyx_v_shm[0]).version); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 74, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __pyx_t_2 = __Pyx_PyInt_From_int((__pyx_v_shm[0]).account_balance); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 74, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_6 = PyTuple_New(3); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 74, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_6);
+    __pyx_t_5 = PyTuple_New(3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 74, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_5);
     __Pyx_INCREF(__pyx_kp_s_data_version_is);
     __Pyx_GIVEREF(__pyx_kp_s_data_version_is);
-    PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_kp_s_data_version_is);
+    PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_kp_s_data_version_is);
     __Pyx_GIVEREF(__pyx_t_1);
-    PyTuple_SET_ITEM(__pyx_t_6, 1, __pyx_t_1);
+    PyTuple_SET_ITEM(__pyx_t_5, 1, __pyx_t_1);
     __Pyx_GIVEREF(__pyx_t_2);
-    PyTuple_SET_ITEM(__pyx_t_6, 2, __pyx_t_2);
+    PyTuple_SET_ITEM(__pyx_t_5, 2, __pyx_t_2);
     __pyx_t_1 = 0;
     __pyx_t_2 = 0;
-    if (__Pyx_PrintOne(0, __pyx_t_6) < 0) __PYX_ERR(0, 74, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+    if (__Pyx_PrintOne(0, __pyx_t_5) < 0) __PYX_ERR(0, 74, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
     /* "example_client.pyx":75
- *         sleep(2)
+ *         bal=shm[0].account_balance
  *         print("data version is ",shm[0].version,shm[0].account_balance)
  *         if trans[done]=="add":             # <<<<<<<<<<<<<<
- *             shm[0].account_balance=shm[0].account_balance+25
+ *             bal=bal+25
  *             sleep(1)
  */
-    __pyx_t_6 = __Pyx_GetItemInt_List(__pyx_v_trans, __pyx_v_done, int, 1, __Pyx_PyInt_From_int, 1, 1, 1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 75, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_3 = (__Pyx_PyString_Equals(__pyx_t_6, __pyx_n_s_add, Py_EQ)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 75, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+    __pyx_t_5 = __Pyx_GetItemInt_List(__pyx_v_trans, __pyx_v_done, int, 1, __Pyx_PyInt_From_int, 1, 1, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 75, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_5);
+    __pyx_t_3 = (__Pyx_PyString_Equals(__pyx_t_5, __pyx_n_s_add, Py_EQ)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 75, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     if (__pyx_t_3) {
 
       /* "example_client.pyx":76
  *         print("data version is ",shm[0].version,shm[0].account_balance)
  *         if trans[done]=="add":
- *             shm[0].account_balance=shm[0].account_balance+25             # <<<<<<<<<<<<<<
+ *             bal=bal+25             # <<<<<<<<<<<<<<
  *             sleep(1)
  *         elif trans[done]=="sub":
  */
-      (__pyx_v_shm[0]).account_balance = ((__pyx_v_shm[0]).account_balance + 25);
+      __pyx_v_bal = (__pyx_v_bal + 25);
 
       /* "example_client.pyx":77
  *         if trans[done]=="add":
- *             shm[0].account_balance=shm[0].account_balance+25
+ *             bal=bal+25
  *             sleep(1)             # <<<<<<<<<<<<<<
  *         elif trans[done]=="sub":
- *             shm[0].account_balance=shm[0].account_balance-50
+ *             bal=bal-50
  */
       (void)(sleep(1));
 
       /* "example_client.pyx":75
- *         sleep(2)
+ *         bal=shm[0].account_balance
  *         print("data version is ",shm[0].version,shm[0].account_balance)
  *         if trans[done]=="add":             # <<<<<<<<<<<<<<
- *             shm[0].account_balance=shm[0].account_balance+25
+ *             bal=bal+25
  *             sleep(1)
  */
       goto __pyx_L10;
     }
 
     /* "example_client.pyx":78
- *             shm[0].account_balance=shm[0].account_balance+25
+ *             bal=bal+25
  *             sleep(1)
  *         elif trans[done]=="sub":             # <<<<<<<<<<<<<<
- *             shm[0].account_balance=shm[0].account_balance-50
+ *             bal=bal-50
  *             sleep(2)
  */
-    __pyx_t_6 = __Pyx_GetItemInt_List(__pyx_v_trans, __pyx_v_done, int, 1, __Pyx_PyInt_From_int, 1, 1, 1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 78, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_3 = (__Pyx_PyString_Equals(__pyx_t_6, __pyx_n_s_sub, Py_EQ)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 78, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+    __pyx_t_5 = __Pyx_GetItemInt_List(__pyx_v_trans, __pyx_v_done, int, 1, __Pyx_PyInt_From_int, 1, 1, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 78, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_5);
+    __pyx_t_3 = (__Pyx_PyString_Equals(__pyx_t_5, __pyx_n_s_sub, Py_EQ)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 78, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     if (__pyx_t_3) {
 
       /* "example_client.pyx":79
  *             sleep(1)
  *         elif trans[done]=="sub":
- *             shm[0].account_balance=shm[0].account_balance-50             # <<<<<<<<<<<<<<
+ *             bal=bal-50             # <<<<<<<<<<<<<<
  *             sleep(2)
- *         print("transaction complete from process 2 ")
+ *         if shm[0].version!=current:
  */
-      (__pyx_v_shm[0]).account_balance = ((__pyx_v_shm[0]).account_balance - 50);
+      __pyx_v_bal = (__pyx_v_bal - 50);
 
       /* "example_client.pyx":80
  *         elif trans[done]=="sub":
- *             shm[0].account_balance=shm[0].account_balance-50
+ *             bal=bal-50
  *             sleep(2)             # <<<<<<<<<<<<<<
- *         print("transaction complete from process 2 ")
- *         shm[0].lock_required=0
+ *         if shm[0].version!=current:
+ *             current=shm[0].version
  */
       (void)(sleep(2));
 
       /* "example_client.pyx":78
- *             shm[0].account_balance=shm[0].account_balance+25
+ *             bal=bal+25
  *             sleep(1)
  *         elif trans[done]=="sub":             # <<<<<<<<<<<<<<
- *             shm[0].account_balance=shm[0].account_balance-50
+ *             bal=bal-50
  *             sleep(2)
  */
     }
     __pyx_L10:;
 
     /* "example_client.pyx":81
- *             shm[0].account_balance=shm[0].account_balance-50
+ *             bal=bal-50
  *             sleep(2)
+ *         if shm[0].version!=current:             # <<<<<<<<<<<<<<
+ *             current=shm[0].version
+ *             continue
+ */
+    __pyx_t_3 = (((__pyx_v_shm[0]).version != __pyx_v_current) != 0);
+    if (__pyx_t_3) {
+
+      /* "example_client.pyx":82
+ *             sleep(2)
+ *         if shm[0].version!=current:
+ *             current=shm[0].version             # <<<<<<<<<<<<<<
+ *             continue
+ *         print("transaction complete from process 2 ")
+ */
+      __pyx_t_4 = (__pyx_v_shm[0]).version;
+      __pyx_v_current = __pyx_t_4;
+
+      /* "example_client.pyx":83
+ *         if shm[0].version!=current:
+ *             current=shm[0].version
+ *             continue             # <<<<<<<<<<<<<<
+ *         print("transaction complete from process 2 ")
+ *         shm[0].account_balance=bal
+ */
+      goto __pyx_L5_continue;
+
+      /* "example_client.pyx":81
+ *             bal=bal-50
+ *             sleep(2)
+ *         if shm[0].version!=current:             # <<<<<<<<<<<<<<
+ *             current=shm[0].version
+ *             continue
+ */
+    }
+
+    /* "example_client.pyx":84
+ *             current=shm[0].version
+ *             continue
  *         print("transaction complete from process 2 ")             # <<<<<<<<<<<<<<
+ *         shm[0].account_balance=bal
+ *         shm[0].version+=1
+ */
+    if (__Pyx_PrintOne(0, __pyx_kp_s_transaction_complete_from_proces) < 0) __PYX_ERR(0, 84, __pyx_L1_error)
+
+    /* "example_client.pyx":85
+ *             continue
+ *         print("transaction complete from process 2 ")
+ *         shm[0].account_balance=bal             # <<<<<<<<<<<<<<
+ *         shm[0].version+=1
+ *         shm[0].lock_required=0
+ */
+    (__pyx_v_shm[0]).account_balance = __pyx_v_bal;
+
+    /* "example_client.pyx":86
+ *         print("transaction complete from process 2 ")
+ *         shm[0].account_balance=bal
+ *         shm[0].version+=1             # <<<<<<<<<<<<<<
  *         shm[0].lock_required=0
  *         done+=1
  */
-    if (__Pyx_PrintOne(0, __pyx_kp_s_transaction_complete_from_proces) < 0) __PYX_ERR(0, 81, __pyx_L1_error)
+    __pyx_t_6 = 0;
+    (__pyx_v_shm[__pyx_t_6]).version = ((__pyx_v_shm[__pyx_t_6]).version + 1);
 
-    /* "example_client.pyx":82
- *             sleep(2)
- *         print("transaction complete from process 2 ")
+    /* "example_client.pyx":87
+ *         shm[0].account_balance=bal
+ *         shm[0].version+=1
  *         shm[0].lock_required=0             # <<<<<<<<<<<<<<
  *         done+=1
  *         print(shm[0].account_balance)
  */
     (__pyx_v_shm[0]).lock_required = 0;
 
-    /* "example_client.pyx":83
- *         print("transaction complete from process 2 ")
+    /* "example_client.pyx":88
+ *         shm[0].version+=1
  *         shm[0].lock_required=0
  *         done+=1             # <<<<<<<<<<<<<<
  *         print(shm[0].account_balance)
@@ -1624,19 +1683,19 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
  */
     __pyx_v_done = (__pyx_v_done + 1);
 
-    /* "example_client.pyx":84
+    /* "example_client.pyx":89
  *         shm[0].lock_required=0
  *         done+=1
  *         print(shm[0].account_balance)             # <<<<<<<<<<<<<<
  *         sleep(2)
  * 
  */
-    __pyx_t_6 = __Pyx_PyInt_From_int((__pyx_v_shm[0]).account_balance); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 84, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_6);
-    if (__Pyx_PrintOne(0, __pyx_t_6) < 0) __PYX_ERR(0, 84, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+    __pyx_t_5 = __Pyx_PyInt_From_int((__pyx_v_shm[0]).account_balance); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 89, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_5);
+    if (__Pyx_PrintOne(0, __pyx_t_5) < 0) __PYX_ERR(0, 89, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-    /* "example_client.pyx":85
+    /* "example_client.pyx":90
  *         done+=1
  *         print(shm[0].account_balance)
  *         sleep(2)             # <<<<<<<<<<<<<<
@@ -1644,21 +1703,22 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
  *     print(shm[0].account_balance)
  */
     (void)(sleep(2));
+    __pyx_L5_continue:;
   }
 
-  /* "example_client.pyx":87
+  /* "example_client.pyx":92
  *         sleep(2)
  * 
  *     print(shm[0].account_balance)             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __pyx_t_6 = __Pyx_PyInt_From_int((__pyx_v_shm[0]).account_balance); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 87, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_6);
-  if (__Pyx_PrintOne(0, __pyx_t_6) < 0) __PYX_ERR(0, 87, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+  __pyx_t_5 = __Pyx_PyInt_From_int((__pyx_v_shm[0]).account_balance); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 92, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_5);
+  if (__Pyx_PrintOne(0, __pyx_t_5) < 0) __PYX_ERR(0, 92, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "example_client.pyx":92
+  /* "example_client.pyx":97
  * 
  * 
  *     sleep(2);             # <<<<<<<<<<<<<<
@@ -1667,7 +1727,7 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
  */
   (void)(sleep(2));
 
-  /* "example_client.pyx":93
+  /* "example_client.pyx":98
  * 
  *     sleep(2);
  *     shmdt(shm);             # <<<<<<<<<<<<<<
@@ -1676,7 +1736,7 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
  */
   (void)(shmdt(__pyx_v_shm));
 
-  /* "example_client.pyx":94
+  /* "example_client.pyx":99
  *     sleep(2);
  *     shmdt(shm);
  *     shmctl(shmid, IPC_RMID, NULL);             # <<<<<<<<<<<<<<
@@ -1685,22 +1745,22 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
  */
   (void)(shmctl(__pyx_v_shmid, IPC_RMID, NULL));
 
-  /* "example_client.pyx":95
+  /* "example_client.pyx":100
  *     shmdt(shm);
  *     shmctl(shmid, IPC_RMID, NULL);
  *     print("client shutting down\n");             # <<<<<<<<<<<<<<
  *     quit()
  */
-  if (__Pyx_PrintOne(0, __pyx_kp_s_client_shutting_down) < 0) __PYX_ERR(0, 95, __pyx_L1_error)
+  if (__Pyx_PrintOne(0, __pyx_kp_s_client_shutting_down) < 0) __PYX_ERR(0, 100, __pyx_L1_error)
 
-  /* "example_client.pyx":96
+  /* "example_client.pyx":101
  *     shmctl(shmid, IPC_RMID, NULL);
  *     print("client shutting down\n");
  *     quit()             # <<<<<<<<<<<<<<
  */
-  __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_builtin_quit); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 96, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_6);
-  __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+  __pyx_t_5 = __Pyx_PyObject_CallNoArg(__pyx_builtin_quit); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 101, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_5);
+  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
   /* "example_client.pyx":41
  *     int APP_SHM_SIZE
@@ -1715,7 +1775,7 @@ static void __pyx_f_14example_client_client(CYTHON_UNUSED int __pyx_skip_dispatc
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_XDECREF(__pyx_t_6);
+  __Pyx_XDECREF(__pyx_t_5);
   __Pyx_WriteUnraisable("example_client.client", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_trans);
