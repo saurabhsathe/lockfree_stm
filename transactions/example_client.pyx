@@ -71,13 +71,13 @@ cpdef void client():
         shm[0].lock_required=lock_requirements[done]
         current=shm[0].version
         sleep(2)
-        print("data version is ",shm[0].version)
+        print("data version is ",shm[0].version,shm[0].account_balance)
         if trans[done]=="add":
-            shm[0].account_balance=shm[0].account_balance*(1+trans_values[done]//100)
-            sleep(2)
-        elif trans[done]=="sub":
-            shm[0].account_balance=shm[0].account_balance*(1-trans_values[done]//100)
+            shm[0].account_balance=shm[0].account_balance+25
             sleep(1)
+        elif trans[done]=="sub":
+            shm[0].account_balance=shm[0].account_balance-50
+            sleep(2)
         print("transaction complete from process 2 ")
         shm[0].lock_required=0
         done+=1
