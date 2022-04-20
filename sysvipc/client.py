@@ -1,10 +1,9 @@
 import time
 import sysv_ipc
-memory = sysv_ipc.SharedMemory(3000)
-for i in range(1,6):
-    memory.write(" client side {}".format(i))
-    time.sleep(1)
+memory = sysv_ipc.SharedMemory(5000)
+for i in range(1,11):
     x=memory.read()
-    print(x)
+    time.sleep(1)
+    print(x[0])
     
 

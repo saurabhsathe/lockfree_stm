@@ -17,11 +17,15 @@ number of threads kinva processing parallely working on it like 2 python and 2 j
 
 import time
 import sys
-mylist=[9,8,7,6,5,4,3,2,1]
-memory = sysv_ipc.SharedMemory(3000,sysv_ipc.IPC_CREX,size=sys.getsizeof(mylist))
-
-for i in range(0,10):
-    memory.write(" serverside {}".format(i))
+mylist=[[9,8,7,6,5,4,3,2,1],[7,6,5,4]]
+print(sys.getsizeof(mylist))
+memory = sysv_ipc.SharedMemory(7000)#,sysv_ipc.IPC_CREX,size=sys.getsizeof(mylist))
+version=1
+version_memory=sysv_ipc.SharedMemory(7000,sysv_ipc.IPC_CREX,size=sys.getsizeof(version))
+memory.write(version)
+for i in range(0,len(mylist)):
+    print("in the loop")
+    memory.write(bytearray(mylist[i]))
     time.sleep(2)
     x=memory.read()
     print(x)

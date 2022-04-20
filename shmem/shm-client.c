@@ -15,7 +15,7 @@
 int main()
 {
     // Locate the segment. Fails if the server has not already created the segment!
-    int shmid = shmget(APP_SHM_KEY, APP_SHM_SIZE, 0666);
+    int shmid = shmget(5000, 270, 0666);
     if ( shmid < 0 ) {
         perror("shmget failed to get application's shared memory segment.");
         exit(1);

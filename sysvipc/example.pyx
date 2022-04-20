@@ -10,6 +10,9 @@ cdef extern from "<sys/shm.h>":
 
 cpdef void myfun():
     print(sqrt(4))
+
+cpdef void writemem(content):
+    memset()
         
     
 

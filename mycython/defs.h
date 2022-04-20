@@ -1,9 +1,9 @@
 #include <stdbool.h>
 
-#define APP_PAYLOAD_SIZE 270
+#define APP_PAYLOAD_SIZE 256
 
 // our key (name) to the sharedmemory
-#define APP_SHM_KEY 5000
+#define APP_SHM_KEY 1111
 
 // shared data
 struct SharedMemoryDataStruct {
